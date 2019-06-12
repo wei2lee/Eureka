@@ -481,7 +481,7 @@ open class MultivaluedSection: Section {
 
     public var multivaluedOptions: MultivaluedOptions
     public var showInsertIconInAddButton = true
-    public var addButtonProvider: ((MultivaluedSection) -> ButtonRow) = { _ in
+    public var addButtonProvider: ((MultivaluedSection) -> BaseRow) = { _ in
         return ButtonRow {
             $0.title = "Add"
             $0.cellStyle = .value1
@@ -518,10 +518,12 @@ open class MultivaluedSection: Section {
 
     func initialize() {
         let addRow = addButtonProvider(self)
-        addRow.onCellSelection { cell, row in
-            guard !row.isDisabled else { return }
-            guard let tableView = cell.formViewController()?.tableView, let indexPath = row.indexPath else { return }
-            cell.formViewController()?.tableView(tableView, commit: .insert, forRowAt: indexPath)
+        if let buttonRowAdd = addRow as? ButtonRow {
+            buttonRowAdd.onCellSelection { cell, row in
+                guard !row.isDisabled else { return }
+                guard let tableView = cell.formViewController()?.tableView, let indexPath = row.indexPath else { return }
+                cell.formViewController()?.tableView(tableView, commit: .insert, forRowAt: indexPath)
+            }
         }
         self <<< addRow
     }
